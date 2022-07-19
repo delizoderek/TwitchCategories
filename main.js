@@ -89,7 +89,7 @@ function checkPage() {
   }
   true_check = false;
 
-  Arrive.unbindAllArrive();
+  // Arrive.unbindAllArrive();
 
   const doc = document.querySelector("div.side-bar-contents");
   doc.innerHTML = "";
@@ -116,15 +116,24 @@ function checkPage() {
 // Run main functions after 10 second delay to let other extensions load and potentially modify HTML
 function main() {
   setTimeout(function () {
-    console.log("Twitch Points Autoclicker: Initialized!");
+    console.log("Twitch Categories Initialized");
 
     true_check = true;
     checkPage();
-  }, 10000);
+  }, 500);
 }
 
+function init() {
+  const doc = document.querySelector("div.side-bar-contents");
+  const children = doc.children;
+  console.log({children, doc : doc.querySelectorAll('a')})
+  doc.innerHTML = "";
+  doc.appendChild(htmlMarkupToNode(header))
+}
+
+function test(){
+  const m = htmlMarkupToNode(header)
+  console.log(m)
+}
 // main();
-const doc = document.querySelector("div.side-bar-contents");
-// doc.innerHTML = `${template}${template}${template}${template}`;
-const children = doc.children;
-console.log({ children });
+// init()

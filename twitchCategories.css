@@ -1,0 +1,5 @@
+.header-text {
+  font-size: var(--font-size-6) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  text-transform: uppercase !important;
+}
