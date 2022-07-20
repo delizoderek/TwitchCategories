@@ -1,5 +1,4 @@
 var true_check = false;
-const template = ''
 const temp = '<div class="Layout-sc-nxg1ff-0 hbYWXo side-nav-header" data-a-target="side-nav-header-expanded"><h2 class="CoreText-sc-cpl358-0 ezafKb">Followed Channels</h2></div>'
 // Finds the right element, clicks the bonus button
 function clickPoints() {
@@ -117,23 +116,30 @@ function checkPage() {
 function main() {
   setTimeout(function () {
     console.log("Twitch Categories Initialized");
-
-    true_check = true;
-    checkPage();
-  }, 500);
+  }, 100);
 }
 
 function init() {
+  document.querySelector('main').innerHTML = ''
+  const followedGroup = document.querySelector('div[aria-label="Followed Channels"]')
+  const followedChannels = document.querySelectorAll('a[data-a-id^="followed-channel"]');
   const doc = document.querySelector("div.side-bar-contents");
-  const children = doc.children;
-  console.log({children, doc : doc.querySelectorAll('a')})
-  doc.innerHTML = "";
-  doc.appendChild(htmlMarkupToNode(header))
+  doc.classList.add('control-display')
+  // const children = doc.children;
+  const liveChannels = []
+  for(let node of followedChannels){
+    if(!node.firstChild.className.includes('offline')){
+      liveChannels.push(node)
+    }
+  }
+  doc.appendChild(buildCategory(liveChannels))
+  // doc.appendChild()
 }
 
 function test(){
   const m = htmlMarkupToNode(header)
   console.log(m)
 }
+console.log('init')
 // main();
-// init()
+init()

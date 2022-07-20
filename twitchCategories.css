@@ -1,5 +1,18 @@
+:root{
+  --display-control : none;
+}
+
+.control-display {
+  display: var(--display-control);
+}
+
 .header-text {
   font-size: var(--font-size-6) !important;
   font-weight: var(--font-weight-semibold) !important;
   text-transform: uppercase !important;
+}
+
+.flex-column {
+  display : flex;
+  flex-direction: column;
 }
