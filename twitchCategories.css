@@ -3,13 +3,18 @@
 }
 
 .control-display {
-  display: var(--display-control);
+  display: var(--display-control) !important;
 }
 
 .header-text {
   font-size: var(--font-size-6) !important;
   font-weight: var(--font-weight-semibold) !important;
   text-transform: uppercase !important;
+}
+
+.header-padding {
+  margin : 1rem;
+  padding-top : 0.5rem;
 }
 
 .flex-column {

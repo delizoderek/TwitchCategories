@@ -124,7 +124,7 @@ function init() {
   const followedGroup = document.querySelector('div[aria-label="Followed Channels"]')
   const followedChannels = document.querySelectorAll('a[data-a-id^="followed-channel"]');
   const doc = document.querySelector("div.side-bar-contents");
-  doc.classList.add('control-display')
+  // doc.classList.add('control-display')
   // const children = doc.children;
   const liveChannels = []
   for(let node of followedChannels){
