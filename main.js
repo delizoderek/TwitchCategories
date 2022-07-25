@@ -81,37 +81,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
 });
 
-function checkPage() {
-  // Prevent firing script upon simultaneous redirects and fast page switching
-  if (!true_check) {
-    return;
-  }
-  true_check = false;
-
-  // Arrive.unbindAllArrive();
-
-  const doc = document.querySelector("div.side-bar-contents");
-  doc.innerHTML = "";
-  const children = doc.children;
-  console.log({ children });
-
-  // if (document.body.contains(document.getElementsByClassName('community-points-summary')[0])) {
-  // 	// Presumably on a channel page that already contains the points section div
-  // 	console.log('Detected inside of a channel page.');
-
-  // 	// Pre-check
-  // 	clickPoints();
-
-  // 	hideBonusPointsSection();
-
-  // 	document.getElementsByClassName('community-points-summary').arrive('button', clickPoints);
-  // }
-  // else {
-  // 	// Presumably outside of a channel page
-  // 	console.log('Detected outside of a channel page.');
-  // }
-}
-
 // Run main functions after 10 second delay to let other extensions load and potentially modify HTML
 function main() {
   setTimeout(function () {
@@ -121,7 +90,6 @@ function main() {
 
 function init() {
   document.querySelector('main').innerHTML = ''
-  const followedGroup = document.querySelector('div[aria-label="Followed Channels"]')
   const followedChannels = document.querySelectorAll('a[data-a-id^="followed-channel"]');
   const doc = document.querySelector("div.side-bar-contents");
   // doc.classList.add('control-display')
@@ -132,13 +100,27 @@ function init() {
       liveChannels.push(node)
     }
   }
-  doc.appendChild(buildCategory(liveChannels))
+  const newCategory = buildCategory(liveChannels)
+  console.log(newCategory)
+  parent.insertBefore(newCategory,nodeFollowedChannels)
   // doc.appendChild()
+  test()
 }
 
 function test(){
-  const m = htmlMarkupToNode(header)
-  console.log(m)
+  var data = {
+    title: "Constructing HTML Elements"
+}
+
+var template = [
+    '<div class="tutorial">',
+        '<h1 class="tutorial-heading">{{title}}<h1>',
+    '</div>'
+].join("\n");
+// template: '<div ...>\n<h1 ...>{{title}}<h1>\n</div>'
+
+var html = Mustache.render(template, data);
+console.log(html)
 }
 console.log('init')
 // main();
