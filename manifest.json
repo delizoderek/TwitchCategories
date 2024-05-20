@@ -8,12 +8,14 @@
       "48": "icon48.jpeg",
       "16": "icon16.jpeg"
     },
-    "content_scripts": [
-      {
-        "matches": ["*://*.twitch.tv/*"],
-        "js": ["mustache.min.js","components.js","main.js"],
-        "css" : ["twitchCategories.css"],
-        "run_at" : "document_end"
-      }
-    ]
+		"content_scripts": [
+			{
+				"js": [
+					"main.js"
+				],
+				"matches": [
+					"https://www.twitch.tv/*"
+				]
+			}
+		]
   }

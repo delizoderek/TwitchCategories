@@ -1,127 +1,206 @@
-var true_check = false;
-const temp = '<div class="Layout-sc-nxg1ff-0 hbYWXo side-nav-header" data-a-target="side-nav-header-expanded"><h2 class="CoreText-sc-cpl358-0 ezafKb">Followed Channels</h2></div>'
-// Finds the right element, clicks the bonus button
-function clickPoints() {
-  console.log("Element detected.");
+// document.addEventListener('DOMSubtreeModified',(event) => {
+// 	const [_, mainNav] = document.querySelectorAll(".simplebar-scroll-content")
+// 	const sideNav = document.querySelectorAll(".simplebar-scroll-content div.side-nav-section")
+// 	if(sideNav) {
+// 		console.log("yeet", sideNav)
+// 		sideNav.forEach((node) => {
 
-  // Get all clickable buttons inside 'community-points-summary'
-  var elems = document
-    .querySelector(".community-points-summary")
-    .querySelectorAll("button");
+// 			if(!node.ariaLabel.toLowerCase().includes('followed')){
+// 					node.remove()
+// 			}
+// 		})
+// 	}
 
-  // Click each button, except for the first, which is the points spending menu
-  elems.forEach(function (currentElem, index, arr) {
-    if (index != 0) {
-      // Click the button and display the console log
-      console.log("Twitch Points Autoclicker: Clicked!");
-      currentElem.click();
+// 	if(location.pathname === '/'){
+// 		document.querySelector(".simplebar-scroll-content > .root-scrollable__content").style.visibility="hidden"
+// 	} else {
+// 		document.querySelector(".simplebar-scroll-content > .root-scrollable__content").style.visibility=""
+// 	}
 
-      // Record the collection to the storage
-      updateClicks();
-    }
-  });
+// 	if(mainNav){
+// 		// mainNav.remove()
+// 	}
+
+// })
+
+const [sideNav, mainNav] = document.querySelectorAll(
+  ".simplebar-scroll-content"
+);
+const whitelist = new Set([
+  "settings",
+  "overweight_unicorn",
+  "kawaiilhea02",
+  "tipsilog",
+]);
+
+const path = location.pathname.split("/");
+
+// if(!whitelist.has(path[1])){
+// 	mainNav.remove()
+// }
+
+// function monitorLocationChange() {
+// 	chrome.webNavigation.onHistoryStateUpdated.addListener(details => {
+// 		 // Tab id where the location change occurred
+// 		 const tabId = details.tabId;
+// 		 // New URL after the change
+// 		 const newUrl = details.url;
+
+//  // Callback function to be executed when the event is triggered
+//  console.log(`Location changed in Tab ${tabId} to: ${newUrl}`);
+//  // Put your custom logic or API calls here to respond to location changes.
+// 	});
+// }
+
+// // Create a MutationObserver to watch for changes to the node's children
+// var observer = new MutationObserver(function(mutations) {
+//   mutations.forEach(function(mutation) {
+//     // Check if the mutation was a childList change
+//     if (mutation.type === 'childList') {
+//       console.log('Child of node updated',mutation);
+//     }
+//   });
+// });
+
+// // Configure the observer to watch for childList changes
+// var config = {
+//   childList: true,
+//   subtree: true
+// };
+
+// function timeoutFunction() {
+//   const loadedSideNav = document.querySelectorAll(".simplebar-scroll-content div.side-nav-section")
+//   console.log(loadedSideNav);
+//   if (!loadedSideNav) {
+//     setTimeout(timeoutFunction, 500);
+//     console.log("Keyword not found.");
+//   } else {
+//     console.log("Keyword found.");
+
+// 		// Start observing the node
+// 		observer.observe(loadedSideNav[1], config);
+// 		// loadedSideNav.forEach((node) => {
+
+// 		// 	if(!node.ariaLabel.toLowerCase().includes('followed')){
+// 		// 			node.remove()
+// 		// 	}
+// 		// })
+//   }
+// }
+
+// setTimeout(timeoutFunction, 500);
+// monitorLocationChange()
+
+let nodeNav;
+
+const config = {
+  childList: true,
+  subtree: true,
+};
+
+function createNewMenu() {
+  const navNode = document.querySelector(".side-bar-contents nav");
+  nodeNav = navNode.cloneNode(false);
+  navNode.parentNode.prepend(nodeNav);
+  navNode.style.visibility = "hidden";
 }
 
-function updateClicks() {
-  chrome.runtime.sendMessage({ clickedBonusPoints: 1 }, function (response) {
-    if (chrome.runtime.lastError) {
-      msg = {};
+function addNodes(nodeList) {
+  nodeList.forEach((node) => {
+    if (node.tagName === 'A') {
+      nodeNav.appendChild(node.cloneNode(true));
     } else {
-      msg = msg || {};
+      const nodes = getNodes(node);
+      if (nodes.linkNode) {
+        nodeNav.appendChild(nodes.linkNode);
+      }
     }
   });
 }
 
-// Check if user is opted into hiding bonus chests and hide them accordingly
-function hideBonusPointsSection() {
-  chrome.storage.sync.get(
-    {
-      hideBonusChests: false,
-    },
-    function (items) {
-      var hideBonusChests = items.hideBonusChests;
-
-      if (hideBonusChests) {
-        var value = "none";
-      } else {
-        var value = "block";
-      }
-
-      if (
-        document.body.contains(
-          document.getElementsByClassName("community-points-summary")[0]
-        )
-      ) {
-        // Chests themselves
-        document.getElementsByClassName(
-          "community-points-summary"
-        )[0].children[1].style.display = value;
-        // Floaty +50 text
-        document.getElementsByClassName(
-          "community-points-summary"
-        )[0].children[0].children[3].style.display = value;
-      }
+function removeNodes(nodeList) {
+  nodeList.forEach((node) => {
+    const nodes = getNodes(node);
+    const linkNodeToRemove = nodeNav.querySelector(
+      `a[href="${nodes.linkNode.href}"]`
+    );
+    if (linkNodeToRemove) {
+      linkNodeToRemove.remove();
     }
-  );
+  });
 }
 
-//Answer background.js handshake
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-  if (msg.text === "check") {
-    sendResponse({ status: "confirmed" });
-  }
-  if ("hideBonusChests" in msg) {
-    sendResponse({ status: "ok" });
-    hideBonusPointsSection();
-  }
-  if ("urlChanged" in msg) {
-    true_check = true;
-    setTimeout(checkPage, 5000);
-    sendResponse({ status: "ok" });
+const followedObserver = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    try {
+      // Check if the mutation was a childList change
+      if (mutation.type === "childList") {
+        if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+          addNodes(mutation.addedNodes);
+        }
+
+        if (mutation.removedNodes && mutation.removedNodes.length > 0) {
+          removeNodes(mutation.removedNodes);
+        }
+      }
+    } catch (error) {
+      console.error("Error occurred in MutationObserver callback:", error);
+    }
+  });
+});
+
+const recommendedObserver = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    // Check if the mutation was a childList change
+    if (mutation.type === "childList") {
+      console.log("Child of node updated", mutation);
+    }
+  });
+});
+
+const suggestedObserver = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    // Check if the mutation was a childList change
+    if (mutation.type === "childList") {
+      console.log("Child of node updated", mutation);
+    }
+  });
+});
+
+function getNodes(parentNode) {
+  const sideNavCard = parentNode.querySelector(".side-nav-card");
+  if (!sideNavCard) return {};
+
+  const gameTitleNode = sideNavCard.querySelector(".side-nav-card__metadata p");
+  const imgNode = sideNavCard.querySelector(".tw-avatar img");
+  const linkNode = sideNavCard.querySelector('a');
+  const viewerCountNode = sideNavCard.querySelector(".jOVwMQ span");
+
+  return { gameTitleNode, imgNode, linkNode, viewerCountNode };
+}
+
+const observer = new MutationObserver(function (mutations) {
+  const loadedSideNav = document.querySelectorAll(
+    ".simplebar-scroll-content div.side-nav-section"
+  );
+
+  if (loadedSideNav && loadedSideNav.length > 0) {
+    createNewMenu();
+    const [followed, recommended, suggested] = loadedSideNav;
+    if (followed) {
+      const followerNodes = followed.children[1].querySelectorAll("a");
+      addNodes(followerNodes)
+      followedObserver.observe(followed, config);
+    }
+    // if(recommended) recommendedObserver.observe(recommended, { childList: true, subtree: true });
+    // if(suggested) suggestedObserver.observe(suggested, { childList: true, subtree: true });
+    // Disconnect the old observer
+    observer.disconnect();
   }
 });
 
-// Run main functions after 10 second delay to let other extensions load and potentially modify HTML
-function main() {
-  setTimeout(function () {
-    console.log("Twitch Categories Initialized");
-  }, 100);
-}
+observer.observe(document.body, config);
 
-function init() {
-  document.querySelector('main').innerHTML = ''
-  const followedChannels = document.querySelectorAll('a[data-a-id^="followed-channel"]');
-  const doc = document.querySelector("div.side-bar-contents");
-  // doc.classList.add('control-display')
-  // const children = doc.children;
-  const liveChannels = []
-  for(let node of followedChannels){
-    if(!node.firstChild.className.includes('offline')){
-      liveChannels.push(node)
-    }
-  }
-  const newCategory = buildCategory(liveChannels)
-  console.log(newCategory)
-  parent.insertBefore(newCategory,nodeFollowedChannels)
-  // doc.appendChild()
-  test()
-}
-
-function test(){
-  var data = {
-    title: "Constructing HTML Elements"
-}
-
-var template = [
-    '<div class="tutorial">',
-        '<h1 class="tutorial-heading">{{title}}<h1>',
-    '</div>'
-].join("\n");
-// template: '<div ...>\n<h1 ...>{{title}}<h1>\n</div>'
-
-var html = Mustache.render(template, data);
-console.log(html)
-}
-console.log('init')
-// main();
-init()
+// document.addEventListener("DOMContentLoaded", function () {
+//   observer.observe(document.body, config);
+// });
