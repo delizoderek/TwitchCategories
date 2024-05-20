@@ -91,6 +91,8 @@ const path = location.pathname.split("/");
 // setTimeout(timeoutFunction, 500);
 // monitorLocationChange()
 
+const stateManager = new StateManager();
+
 let nodeNav;
 
 const config = {
@@ -102,20 +104,31 @@ function createNewMenu() {
   const navNode = document.querySelector(".side-bar-contents nav");
   nodeNav = navNode.cloneNode(false);
   navNode.parentNode.prepend(nodeNav);
+	const button = document.createElement('button');
+	button.textContent = 'Press Me'
+	button.addEventListener('click',(evt) => {
+		evt.preventDefault();
+		const newNode = stateManager.createAnchorNode()
+		nodeNav.appendChild(newNode)
+	})
+	navNode.parentNode.prepend(button)
   navNode.style.visibility = "hidden";
 }
 
 function addNodes(nodeList) {
+  const newNodes = [];
   nodeList.forEach((node) => {
-    if (node.tagName === 'A') {
+    if (node.tagName === "A") {
       nodeNav.appendChild(node.cloneNode(true));
     } else {
       const nodes = getNodes(node);
       if (nodes.linkNode) {
+        newNodes.push(nodes.linkNode);
         nodeNav.appendChild(nodes.linkNode);
       }
     }
   });
+  stateManager.onUpdate(newNodes);
 }
 
 function removeNodes(nodeList) {
@@ -173,7 +186,7 @@ function getNodes(parentNode) {
 
   const gameTitleNode = sideNavCard.querySelector(".side-nav-card__metadata p");
   const imgNode = sideNavCard.querySelector(".tw-avatar img");
-  const linkNode = sideNavCard.querySelector('a');
+  const linkNode = sideNavCard.querySelector("a");
   const viewerCountNode = sideNavCard.querySelector(".jOVwMQ span");
 
   return { gameTitleNode, imgNode, linkNode, viewerCountNode };
@@ -189,7 +202,8 @@ const observer = new MutationObserver(function (mutations) {
     const [followed, recommended, suggested] = loadedSideNav;
     if (followed) {
       const followerNodes = followed.children[1].querySelectorAll("a");
-      addNodes(followerNodes)
+      stateManager.initState(followerNodes);
+      addNodes(followerNodes);
       followedObserver.observe(followed, config);
     }
     // if(recommended) recommendedObserver.observe(recommended, { childList: true, subtree: true });

@@ -11,6 +11,7 @@
 		"content_scripts": [
 			{
 				"js": [
+					"StateManager.js",
 					"main.js"
 				],
 				"matches": [
